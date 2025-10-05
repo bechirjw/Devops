@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')  // 🔑 ID créé dans Jenkins
-        DOCKERHUB_REPO = 'jouini926'                      // 🔁 ton repo DockerHub
+        DOCKERHUB_REPO = 'jouini926/devops'                      // 🔁 ton repo DockerHub
         IMAGE_TAG = "${GIT_COMMIT.take(7)}"                              // 🔖 tag basé sur le commit
     }
 
