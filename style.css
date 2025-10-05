@@ -1,0 +1,54 @@
+/* Arrière-plan en dégradé doux */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #ffe9e3, #e6f0ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Carte centrale avec effet glassmorphism */
+.card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+/* Titre */
+h1 {
+  color: #3b2f2f;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+/* Texte */
+p {
+  color: #4f6272;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* Bouton moderne */
+button {
+  background: linear-gradient(135deg, #e0479e, #7a3015);
+  border: none;
+  color: white;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(224, 71, 158, 0.3);
+}
