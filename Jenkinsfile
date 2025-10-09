@@ -2,15 +2,14 @@ pipeline {
   agent any
 
   environment {
-    // 🔧 Image coordinates
     DOCKERHUB_REPO = 'jouini926/devops'
-    IMAGE_TAG      = "${GIT_COMMIT.take(7)}"  // short SHA
+    IMAGE_TAG      = "${GIT_COMMIT.take(7)}"
   }
 
   options {
-    ansiColor('xterm')
+    timestamps()                                   // keep readable logs
     buildDiscarder(logRotator(numToKeepStr: '20')) // keep last 20 builds
-    timeout(time: 30, unit: 'MINUTES')            // global safety timeout
+    timeout(time: 30, unit: 'MINUTES')             // global safety timeout
   }
 
   stages {
@@ -33,7 +32,6 @@ pipeline {
 
     stage('Quality Gate') {
       steps {
-        // Make sure SonarQube has a webhook pointing to: http(s)://<JENKINS_URL>/sonarqube-webhook
         timeout(time: 10, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
@@ -71,15 +69,8 @@ pipeline {
   }
 
   post {
-    success {
-      echo "✅ Build, Sonar & Push: OK"
-    }
-    failure {
-      echo "❌ Pipeline failed."
-    }
-    always {
-      // Optional: show disk usage or cleanup if your agents are tight on space
-      sh 'docker image prune -f || true'
-    }
+    success { echo "✅ Build, Sonar & Push: OK" }
+    failure { echo "❌ Pipeline failed." }
+    always  { sh 'docker image prune -f || true' }
   }
 }
