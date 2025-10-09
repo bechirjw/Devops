@@ -6,12 +6,6 @@ pipeline {
     IMAGE_TAG      = "${GIT_COMMIT.take(7)}"
   }
 
-  options {
-    timestamps()                                   // keep readable logs
-    buildDiscarder(logRotator(numToKeepStr: '20')) // keep last 20 builds
-    timeout(time: 30, unit: 'MINUTES')             // global safety timeout
-  }
-
   stages {
     stage('Checkout') {
       steps {
@@ -22,10 +16,7 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-          sh """
-            ${tool 'SonarScanner'}/bin/sonar-scanner \
-              -Dsonar.verbose=true
-          """
+          sh "${tool 'SonarScanner'}/bin/sonar-scanner -Dsonar.verbose=true"
         }
       }
     }
@@ -41,7 +32,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh """
-          echo '🔨 Building Docker image...'
+          echo "🔨 Building Docker image..."
           docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .
           docker tag ${DOCKERHUB_REPO}:${IMAGE_TAG} ${DOCKERHUB_REPO}:latest
         """
@@ -49,13 +40,10 @@ pipeline {
     }
 
     stage('Push to DockerHub') {
-      when { branch 'main' } // push only from main
       steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub',
-          usernameVariable: 'DOCKERHUB_USER',
-          passwordVariable: 'DOCKERHUB_PASS'
-        )]) {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub',
+                                          usernameVariable: 'DOCKERHUB_USER',
+                                          passwordVariable: 'DOCKERHUB_PASS')]) {
           sh '''
             set -e
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
@@ -71,6 +59,5 @@ pipeline {
   post {
     success { echo "✅ Build, Sonar & Push: OK" }
     failure { echo "❌ Pipeline failed." }
-    always  { sh 'docker image prune -f || true' }
   }
 }
