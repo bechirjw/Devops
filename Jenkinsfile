@@ -14,6 +14,26 @@ pipeline {
             }
         }
 
+        // 🔎 Analyse SonarQube (HTML/CSS/JS/…)
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                      ${tool 'SonarScanner'}/bin/sonar-scanner
+                    """
+                }
+            }
+        }
+
+        // 🚦 Quality Gate : stoppe le pipeline si le gate échoue
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    // Nécessite le webhook Sonar -> Jenkins : http://<JENKINS_URL>/sonarqube-webhook
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 sh """
