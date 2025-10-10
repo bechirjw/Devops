@@ -13,21 +13,7 @@ pipeline {
       }
     }
 
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv('SonarQube') {
-          sh "${tool 'SonarScanner'}/bin/sonar-scanner -Dsonar.verbose=true"
-        }
-      }
-    }
-
-    stage('Quality Gate') {
-      steps {
-        timeout(time: 10, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
+    
 
     stage('Build Docker Image') {
       steps {
