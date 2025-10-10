@@ -4,6 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_REPO = 'jouini926/devops'
     IMAGE_TAG      = "${GIT_COMMIT.take(7)}"
+    SONAR_HOST_URL = 'http://localhost:9000' // ajuste si besoin
   }
 
   stages {
@@ -13,7 +14,24 @@ pipeline {
       }
     }
 
-    
+    stage('sonarQube Analysis') {
+      steps {
+        script {
+          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            dir('tpfoyer') {
+              sh '''
+                set -e
+                mvn clean verify sonar:sonar \
+                  -DskipTests=true -DskipITs=true \
+                  -Dsonar.host.url=$SONAR_HOST_URL \
+                  -Dsonar.login=$SONAR_TOKEN
+              '''
+            }
+          }
+        }
+      }
+    }
+
 
     stage('Build Docker Image') {
       steps {
