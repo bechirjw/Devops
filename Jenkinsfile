@@ -15,23 +15,23 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-
-      steps {
-        script {
-          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-            withSonarQubeEnv('SonarQube') {
-              sh '''
-                ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                  -Dsonar.projectKey=devops-html \
-                  -Dsonar.sources=. \
-                  -Dsonar.host.url=$SONAR_HOST_URL \
-                  -Dsonar.login=$SONAR_TOKEN
-              '''
-            }
-          }
+  steps {
+    script {
+      withSonarQubeEnv('SonarQube') {
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+          sh '''
+            ${tool "SonarScanner"}/bin/sonar-scanner \
+              -Dsonar.projectKey=devops-html \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN
+          '''
         }
       }
     }
+  }
+}
+
 
 
 
