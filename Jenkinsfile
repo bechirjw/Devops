@@ -18,7 +18,7 @@ pipeline {
       steps {
         script {
           withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-            dir('tpfoyer') {
+
               sh '''
                 set -e
                 mvn clean verify sonar:sonar \
@@ -26,7 +26,7 @@ pipeline {
                   -Dsonar.host.url=$SONAR_HOST_URL \
                   -Dsonar.login=$SONAR_TOKEN
               '''
-            }
+            
           }
         }
       }
