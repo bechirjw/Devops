@@ -4,10 +4,11 @@ pipeline {
   environment {
     DOCKERHUB_REPO = 'jouini926/devops'
     IMAGE_TAG      = "${GIT_COMMIT.take(7)}"
-    SONAR_HOST_URL = 'http://localhost:9000' // ajuste si besoin
+    SONAR_HOST_URL = 'http://localhost:9000' // change if your SonarQube runs elsewhere
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         git branch: 'main', url: 'https://github.com/bechirjw/Devops.git'
@@ -15,26 +16,25 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-  steps {
-    script {
-      withSonarQubeEnv('SonarQube') {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-          sh '''
-            ${tool "SonarScanner"}/bin/sonar-scanner \
-              -Dsonar.projectKey=devops-html \
-              -Dsonar.sources=. \
-              -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
+      steps {
+        script {
+          // resolve the SonarScanner path before entering the shell
+          def scannerHome = tool 'SonarScanner'
+
+          withSonarQubeEnv('SonarQube') {
+            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+              sh """
+                ${scannerHome}/bin/sonar-scanner \
+                  -Dsonar.projectKey=devops-html \
+                  -Dsonar.sources=. \
+                  -Dsonar.host.url=$SONAR_HOST_URL \
+                  -Dsonar.login=$SONAR_TOKEN
+              """
+            }
+          }
         }
       }
     }
-  }
-}
-
-
-
-
 
     stage('Build Docker Image') {
       steps {
@@ -51,13 +51,13 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhub',
                                           usernameVariable: 'DOCKERHUB_USER',
                                           passwordVariable: 'DOCKERHUB_PASS')]) {
-          sh '''
+          sh """
             set -e
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
             docker push "${DOCKERHUB_REPO}:${IMAGE_TAG}"
             docker push "${DOCKERHUB_REPO}:latest"
             docker logout
-          '''
+          """
         }
       }
     }
