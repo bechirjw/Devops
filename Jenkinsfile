@@ -14,25 +14,28 @@ pipeline {
       }
     }
 
-    stage('sonarQube Analysis') {
+    stage('SonarQube Analysis') {
+      tools {
+        sonarQube 'SonarScanner'
+      }
       steps {
         script {
           withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-
-              withSonarQubeEnv('SonarQube') {
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=devops-html \
-              -Dsonar.sources=. \
-              -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
-        }
-            
+            withSonarQubeEnv('SonarQube') {
+              sh '''
+                ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                  -Dsonar.projectKey=devops-html \
+                  -Dsonar.sources=. \
+                  -Dsonar.host.url=$SONAR_HOST_URL \
+                  -Dsonar.login=$SONAR_TOKEN
+              '''
+            }
           }
         }
       }
     }
+
+
 
 
     stage('Build Docker Image') {
